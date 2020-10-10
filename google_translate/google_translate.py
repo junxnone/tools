@@ -1,41 +1,26 @@
 import six
 from google.cloud import translate_v2 as translate
-from google.cloud import translate_v2 as translate
-from google.cloud import storage
 from argparse import ArgumentParser
 
 
-def translate_text(target, text):
-    from google.cloud import translate_v2 as translate
+class google_translate():
+    def __init__(self, target):
+        self.translate_client = translate.Client()
+        self.target = target
 
-    translate_client = translate.Client()
+    def translate(self, text):
+        if isinstance(text, six.binary_type):
+            text = text.decode("utf-8")
 
-    if isinstance(text, six.binary_type):
-        text = text.decode("utf-8")
+        result = self.translate_client.translate(text,
+                                                 target_language=self.target)
+        return result
 
-    result = translate_client.translate(text, target_language=target)
-    return result
+    def list_languages(self):
+        results = self.translate_client.get_languages()
 
-
-def translate_en2cn(text):
-    return translate_text('zh-cn', text)
-
-
-def list_languages():
-
-    translate_client = translate.Client()
-
-    results = translate_client.get_languages()
-
-    for language in results:
-        print(u"{name} ({language})".format(**language))
-
-
-def implicit():
-    storage_client = storage.Client()
-
-    buckets = list(storage_client.list_buckets())
-    print(buckets)
+        for language in results:
+            print(u"{name} ({language})".format(**language))
 
 
 def build_argparser():
@@ -52,7 +37,8 @@ def build_argparser():
 
 if __name__ == '__main__':
     args = build_argparser().parse_args()
-    t_result = translate_en2cn(args.input)
+    gt = google_translate('zh-cn')
+    t_result = gt.translate(args.input)
     print(u"Text: {}".format(t_result["input"]))
     print(u"Translation: {}".format(t_result["translatedText"]))
     print(u"Detected source language: {}".format(
