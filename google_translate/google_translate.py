@@ -3,7 +3,7 @@ from google.cloud import translate_v2 as translate
 from argparse import ArgumentParser
 
 
-class google_translate():
+class google_translator():
     def __init__(self, target):
         self.translate_client = translate.Client()
         self.target = target
@@ -37,7 +37,7 @@ def build_argparser():
 
 if __name__ == '__main__':
     args = build_argparser().parse_args()
-    gt = google_translate('zh-cn')
+    gt = google_translator('zh-cn')
     t_result = gt.translate(args.input)
     print(u"Text: {}".format(t_result["input"]))
     print(u"Translation: {}".format(t_result["translatedText"]))
