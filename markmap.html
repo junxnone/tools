@@ -4,14 +4,15 @@
 <head>
     <meta charset="UTF-8" />
     <title>MarkMap</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link href="https://markmap.js.org/favicon.png" rel="icon" type="image/png" />
     <style>
         html,
         body,
         svg,
         .markmap {
-            width: 100%;
-            height: 100%;
+            width: 99%;
+            height: 97%;
             margin: 0;
             background-color: RGB(227, 237, 205);
         }
@@ -32,12 +33,28 @@
         //render markmap in the div
         const renderMap = function (str, prefix) {
             const dst = document.getElementById("MarkMap");
-            dst.innerHTML = str;
+            //markmap-autoloader reads back el.textContent as the markdown source;
+            //assigning via innerHTML would make the browser HTML-parse the raw
+            //markdown first, silently mangling any "<"/">" in it (e.g. C/C++ code
+            //blocks with "i<n" comparisons) before autoloader ever sees the text
+            dst.textContent = str;
             if (prefix) {
-                dst.innerHTML = str.replace(/\]\(/g, "](" + prefix);
+                dst.textContent = str.replace(/\]\(\s*(?![a-zA-Z][a-zA-Z0-9+.-]*:|\/\/|#)/g, "](" + prefix);
             }
             markmap.autoLoader.renderAll();
         };
+        function AppendLink(url) {
+            var div = document.getElementById("divMain");
+            const texth1 = document.createElement("H3");
+            const linkTmp = document.createElement("a");
+            let index = url.lastIndexOf("/");
+            let newUrl = url.substring(0, index) + "/#/" + url.substring(index+1, url.length)
+            linkTmp.href = newUrl;
+            console.log("add link:"+newUrl)
+            linkTmp.innerText = "Wiki Page"; 
+            texth1.appendChild(linkTmp)
+            div.appendChild(texth1);
+        }
 
         //process searchparams and get string
         async function main() {
@@ -54,6 +71,7 @@
                     md = md + ".md";
                     console.log("render markdown:"+md)
                 }
+                AppendLink(md)
                 const reqUrl = md
                     ? new URL(md)
                     : new URL("README.md", document.location);
